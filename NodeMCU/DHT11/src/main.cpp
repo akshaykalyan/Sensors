@@ -1,10 +1,9 @@
 #include <Arduino.h>
-
 #include "DHT.h"        // including the library of DHT11 temperature and humidity sensor
 #define DHTTYPE DHT11   // DHT 11
 
 #define dht_dpin 0
-DHT dht(dht_dpin, DHT11); 
+DHT dht(dht_dpin, DHTTYPE); 
 void setup(void)
 { 
   dht.begin();
