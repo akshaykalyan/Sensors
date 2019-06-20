@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
+#include <ESP8266WebServer.h>     //Local WebServer used to serve the configuration portal
+#include <WiFiManager.h> 
 
 String defaultSSID = "king1";
 String defaultPassword = "parveen1325";
@@ -8,6 +10,7 @@ char defaultPassword_loc = 110;
 
 void writeString(char add, String data);
 String read_String(char add);
+
 
 void setup()
 {
