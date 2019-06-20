@@ -16,7 +16,7 @@ char ssid[] = "LSM";
 char pass[] = "lesmartomation";
 
 //wifi portal timeout
-int portalTimeout =30;
+int portalTimeout = 30;
 
 const int buttonPin = D1;
 const int relayPin = D5;
