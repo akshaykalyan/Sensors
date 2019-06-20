@@ -1,6 +1,5 @@
 #include <FS.h>
 #include <Arduino.h>
-#define BLYNK_PRINT Serial
 #include <ESP8266WiFi.h>
 #include <BlynkSimpleEsp8266.h>
 #include <EEPROM.h>
@@ -9,6 +8,7 @@
 #include <WiFiManager.h>
 #include <ArduinoJson.h>
 
+#define BLYNK_PRINT Serial
 char auth[33];
 
 //default hotspot password
