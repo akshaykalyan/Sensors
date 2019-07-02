@@ -1,3 +1,10 @@
+/**
+ * @author Akshay Kalyan
+ * @email akshaykalyan2307@gmail.com
+ * @create date 2019-07-02 11:55:52
+ * @modify date 2019-07-02 11:55:52
+ */
+
 #include <FS.h>
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
@@ -20,7 +27,6 @@ int portalTimeout = 30;
 
 const int buttonPin = D1;
 const int relayPin = D5;
-//flag for saving data
 bool buttonState;
 bool relayState;
 
@@ -28,6 +34,7 @@ BlynkTimer timer;
 
 WiFiManager wifiManager;
 
+//flag for saving data
 bool shouldSaveConfig = false;
 
 //callback notifying us of the need to save config
@@ -41,7 +48,7 @@ bool getState(bool pullUp);
 void writeToRelay(int relayPin, bool pinValue);
 void buttonPressedOnline();
 void buttonPressedOffline();
-bool toggleRelayState(int relayPin, bool relayState);
+void toggleRelayState(int relayPin, bool relayState);
 void readConfig();
 void writeConfig();
 BLYNK_CONNECTED()
@@ -77,20 +84,7 @@ void setup()
   strcpy(auth, custom_blynk_token.getValue());
   writeConfig();
   Blynk.config(auth);
-  bool result = Blynk.connect();
-
-  if (result != true)
-  {
-    Serial.println("BLYNK Connection Fail");
-    Serial.println(auth);
-    wifiManager.resetSettings();
-    ESP.reset();
-    delay(5000);
-  }
-  else
-  {
-    Serial.println("BLYNK Connected");
-  }
+  Blynk.connect();
 
   pinMode(buttonPin, INPUT_PULLUP);
   pinMode(relayPin, OUTPUT);
@@ -139,7 +133,7 @@ void buttonPressedOffline()
   delay(100);
 }
 
-bool toggleRelayState(int relayPin, bool relayState)
+void toggleRelayState(int relayPin, bool relayState)
 {
   writeToRelay(relayPin, !relayState);
   Blynk.virtualWrite(V1, !relayState);
