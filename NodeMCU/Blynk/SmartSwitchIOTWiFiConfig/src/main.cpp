@@ -2,7 +2,8 @@
  * @author Akshay Kalyan
  * @email akshaykalyan2307@gmail.com
  * @create date 2019-07-02 11:55:52
- * @modify date 2019-07-02 11:55:52
+ * @modify date 2019-07-02 12:06:23
+ * @desc Blynk 1 Switch IoT NodeMCU 1.0 Intelligent WiFi hotspot configurator
  */
 
 #include <FS.h>
