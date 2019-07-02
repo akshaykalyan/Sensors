@@ -15,7 +15,6 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>
 #include <ArduinoJson.h>
-#define BLYNK_PRINT Serial
 
 char auth[33];
 //default hotspot password
