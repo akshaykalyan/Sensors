@@ -75,7 +75,6 @@ void setup()
 
   pinMode(hotspotPin, INPUT_PULLUP);
 }
-
 void loop()
 {
   void checkHotpotButton();
@@ -88,13 +87,11 @@ bool getState(bool pullUp)
 {
   return !pullUp;
 }
-
 void writeToRelay(int relayPin, bool pinValue)
 {
   digitalWrite(relayPin, pinValue);
   relayState = pinValue;
 }
-
 void buttonPressedOnline()
 {
   if (buttonState != getState(digitalRead(buttonPin)))
@@ -114,12 +111,12 @@ void buttonPressedOffline()
   }
   delay(100);
 }
-
 void toggleRelayState(int relayPin, bool relayState)
 {
   writeToRelay(relayPin, !relayState);
   Blynk.virtualWrite(V1, !relayState);
 }
+
 void readConfig()
 {
 
@@ -162,7 +159,6 @@ void readConfig()
   {
     Serial.println("failed to mount FS");
   }
-  //end read
 }
 void writeConfig()
 {
@@ -184,11 +180,11 @@ void writeConfig()
     json.printTo(Serial);
     json.printTo(configFile);
     configFile.close();
-    //end save
   }
 }
-  void checkHotpotButton(){
-    if (!digitalRead(hotspotPin))
+void checkHotpotButton()
+{
+  if (!digitalRead(hotspotPin))
   {
     wifiManager.setCustomHeadElement("<style> body{background-color:#212121;color:white;} button{background-color:#febhotspotPin18;} </style>");
     WiFiManagerParameter custom_blynk_token("Blynk", "blynk token", auth, 33);
@@ -199,4 +195,4 @@ void writeConfig()
     strcpy(auth, custom_blynk_token.getValue());
     writeConfig();
   }
-  }
+}
