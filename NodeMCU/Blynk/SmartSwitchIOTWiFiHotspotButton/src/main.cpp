@@ -35,6 +35,7 @@ void saveConfigCallback()
 void readConfig();
 void writeConfig();
 void checkHotpotButton();
+void makeHotspot();
 
 const int buttonPin = D1;
 const int relayPin = D5;
@@ -73,7 +74,6 @@ void setup()
 
   buttonState = getState(digitalRead(buttonPin));
   timer.setInterval(100L, buttonPressedOnline);
-
 }
 void loop()
 {
@@ -154,6 +154,10 @@ void readConfig()
         }
       }
     }
+    else
+    {
+      makeHotspot();
+    }
   }
   else
   {
@@ -186,13 +190,17 @@ void checkHotpotButton()
 {
   if (!digitalRead(hotspotPin))
   {
-    wifiManager.setCustomHeadElement("<style> body{background-color:#212121;color:white;} button{background-color:#febhotspotPin18;} </style>");
-    WiFiManagerParameter custom_blynk_token("Blynk", "blynk token", auth, 33);
-    wifiManager.setSaveConfigCallback(saveConfigCallback);
-    wifiManager.addParameter(&custom_blynk_token);
-    wifiManager.startConfigPortal(ssid);
-    Serial.println("connected:)");
-    strcpy(auth, custom_blynk_token.getValue());
-    writeConfig();
+    makeHotspot();
   }
+}
+void makeHotspot()
+{
+  wifiManager.setCustomHeadElement("<style> body{background-color:#212121;color:white;} button{background-color:#feb018;} </style>");
+  WiFiManagerParameter custom_blynk_token("Blynk", "blynk token", auth, 33);
+  wifiManager.setSaveConfigCallback(saveConfigCallback);
+  wifiManager.addParameter(&custom_blynk_token);
+  wifiManager.startConfigPortal(ssid);
+  Serial.println("connected:)");
+  strcpy(auth, custom_blynk_token.getValue());
+  writeConfig();
 }
