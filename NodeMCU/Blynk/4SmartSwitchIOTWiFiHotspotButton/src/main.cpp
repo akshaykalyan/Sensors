@@ -2,7 +2,7 @@
  * @author Akshay Kalyan
  * @email akshaykalyan2307@gmail.com
  * @create date 2019-07-03 08:07:14
- * @modify date 2019-07-03 08:25:23
+ * @modify date 2019-07-04 19:36:26
  * @desc Blynk 4 Switch IoT NodeMCU 1.0 Button WiFi hotspot configurator
  */
 
@@ -35,15 +35,16 @@ void saveConfigCallback()
 void readConfig();
 void writeConfig();
 void checkHotpotButton();
+void makeHotspot();
 
 const int buttonPin1 = D1;
 const int buttonPin2 = D2;
 const int buttonPin3 = D6;
 const int buttonPin4 = D7;
-const int relayPin1 = D5;
-const int relayPin2 = D6;
-const int relayPin3 = D3;
-const int relayPin4 = D4;
+const int relayPin1 = D0;
+const int relayPin2 = D4;
+const int relayPin3 = D5;
+const int relayPin4 = D8;
 
 bool buttonState1;
 bool relayState1;
@@ -265,6 +266,9 @@ void readConfig()
         }
       }
     }
+    else{
+      makeHotspot();
+    }
   }
   else
   {
@@ -297,7 +301,11 @@ void checkHotpotButton()
 {
   if (!digitalRead(hotspotPin))
   {
-    wifiManager.setCustomHeadElement("<style> body{background-color:#212121;color:white;} button{background-color:#febhotspotPin18;} </style>");
+    makeHotspot();
+  }
+}
+void makeHotspot(){
+    wifiManager.setCustomHeadElement("<style> body{background-color:#212121;color:white;} button{background-color:#feb018;} </style>");
     WiFiManagerParameter custom_blynk_token("Blynk", "blynk token", auth, 33);
     wifiManager.setSaveConfigCallback(saveConfigCallback);
     wifiManager.addParameter(&custom_blynk_token);
@@ -305,5 +313,4 @@ void checkHotpotButton()
     Serial.println("connected:)");
     strcpy(auth, custom_blynk_token.getValue());
     writeConfig();
-  }
 }
