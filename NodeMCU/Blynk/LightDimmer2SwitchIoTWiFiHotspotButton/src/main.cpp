@@ -9,7 +9,7 @@
 #include <FS.h>
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <BlynkSimpleEsp8266.h1>
+#include <BlynkSimpleEsp8266.h>
 #include <EEPROM.h>
 #include <DNSServer.h>
 #include <ESP8266WebServer.h>
