@@ -1,9 +1,9 @@
 /**
  * @author Akshay Kalyan
  * @email akshaykalyan2307@gmail.com
- * @create date 2019-07-02 11:55:52
- * @modify date 2019-07-02 12:06:23
- * @desc Blynk 1 Switch IoT NodeMCU 1.0 Intelligent WiFi hotspot configurator
+ * @create date 2019-07-16 12:22:18
+ * @modify date 2019-07-16 12:22:18
+ * @desc Blynk Water tank with auto hydroelectric motor cuttoff monitoring electric IoT NodeMCU 1.0 Intelligent WiFi hotspot configurator
  */
 
 #include <FS.h>
@@ -16,7 +16,6 @@
 #include <WiFiManager.h>
 #include <ArduinoJson.h>
 
-#define BLYNK_PRINT Serial
 char auth[33];
 
 //default hotspot password
@@ -26,12 +25,24 @@ char pass[] = "lesmartomation";
 //wifi portal timeout
 int portalTimeout = 30;
 
+const int trigPin = D6; // Trigger Pin of Ultrasonic Sensor
+const int echoPin = D7; // Echo Pin of Ultrasonic Sensor
 const int buttonPin = D1;
 const int relayPin = D5;
+
 bool buttonState;
 bool relayState;
+int clearanceOfTank = 30;
+int heightOfTank = 112;
 
+long duration, distance;
+int prev;
+int prevprev;
+double formula;
+bool autocut;
+// Timer for blynking
 BlynkTimer timer;
+static bool value = true;
 
 WiFiManager wifiManager;
 
@@ -44,8 +55,8 @@ void saveConfigCallback()
   Serial.println("Should save config");
   shouldSaveConfig = true;
 }
-
 //Declaration
+void turnoffmotor();
 bool getState(bool pullUp);
 void writeToRelay(int relayPin, bool pinValue);
 void buttonPressedOnline();
@@ -53,57 +64,99 @@ void buttonPressedOffline();
 void toggleRelayState(int relayPin, bool relayState);
 void readConfig();
 void writeConfig();
-BLYNK_CONNECTED()
-{
-  Blynk.syncAll();
-}
 
+void blynkAnotherDevice()
+{
+  if (buttonState != getState(digitalRead(buttonPin)))
+  {
+    toggleRelayState(relayPin, relayState);
+    buttonState = getState(digitalRead(buttonPin));
+  }
+  Serial.println(distance);
+
+  if (distance < clearanceOfTank && prev < clearanceOfTank && prevprev < clearanceOfTank && distance != 0 && prev != 0 && prevprev != 0 && autocut == true)
+  {
+    turnoffmotor();
+  }
+  prevprev = prev;
+  prev = distance;
+  float A, B;
+  float C;
+  A = heightOfTank - distance;
+  B = heightOfTank - clearanceOfTank;
+  C = A / B;
+
+  formula = C * 100;
+  Serial.println(formula);
+  if (distance != 0)
+  {
+    Blynk.virtualWrite(V7, formula);
+  }
+}
+void turnoffmotor()
+{
+  toggleRelayState(relayPin, 1);
+  buttonState = getState(digitalRead(buttonPin));
+}
 BLYNK_WRITE(V1)
 {
   int pinValue = param.asInt();
   writeToRelay(relayPin, pinValue);
 }
-
+BLYNK_WRITE(V8)
+{
+  int pinValue = param.asInt();
+  autocut = pinValue;
+}
 void setup()
 {
-  Serial.begin(9600);
-  readConfig();
-  wifiManager.setCustomHeadElement("<style> body{background-color:#212121;color:white;} button{background-color:#feb018;} </style>");
-  WiFiManagerParameter custom_blynk_token("Blynk", "blynk token", auth, 33);
-  wifiManager.setSaveConfigCallback(saveConfigCallback);
-  wifiManager.addParameter(&custom_blynk_token);
-  // wifiManager.autoConnect(ssid, pass);
-  wifiManager.setConfigPortalTimeout(portalTimeout);
-  if (!wifiManager.autoConnect(ssid, pass))
-  {
-    Serial.println("failed to connect and hit timeout");
-    delay(3000);
-    //reset and try again, or maybe put it to deep sleep
-    ESP.reset();
-    delay(5000);
-  }
-  Serial.println("connected:)");
-  strcpy(auth, custom_blynk_token.getValue());
-  writeConfig();
-  Blynk.config(auth);
-  Blynk.connect();
-
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600); // Starting Serial Terminal
+  Blynk.begin(auth, ssid, pass);
   pinMode(buttonPin, INPUT_PULLUP);
   pinMode(relayPin, OUTPUT);
-
-  writeToRelay(relayPin, false);
-
   buttonState = getState(digitalRead(buttonPin));
-  timer.setInterval(100L, buttonPressedOnline);
+  timer.setInterval(1000L, blynkAnotherDevice);
 }
 
 void loop()
 {
   buttonPressedOffline();
+
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(5);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+  // Calculate the distance
+  distance = duration * 0.034 / 2;
+  //Print the distance on the Serial Monitor (Ctrl+Shift+M)
+
   Blynk.run();
+
   timer.run();
 }
 
+void buttonPressedOffline()
+{
+  if (Blynk.connected() == false)
+  {
+    if (buttonState != getState(digitalRead(buttonPin)))
+    {
+      writeToRelay(relayPin, !relayState);
+    }
+    delay(100);
+  }
+}
+void toggleRelayState(int relayPin, bool relayState)
+{
+  writeToRelay(relayPin, !relayState);
+  Blynk.virtualWrite(V1, !relayState);
+}
 bool getState(bool pullUp)
 {
   return !pullUp;
@@ -113,32 +166,6 @@ void writeToRelay(int relayPin, bool pinValue)
 {
   digitalWrite(relayPin, pinValue);
   relayState = pinValue;
-}
-
-void buttonPressedOnline()
-{
-  if (buttonState != getState(digitalRead(buttonPin)))
-  {
-    toggleRelayState(relayPin, relayState);
-    buttonState = getState(digitalRead(buttonPin));
-  }
-}
-void buttonPressedOffline()
-{
-  if (Blynk.connected() == false)
-  {
-    if (buttonState != getState(digitalRead(buttonPin)))
-    {
-      writeToRelay(relayPin, !relayState);
-    }
-  }
-  delay(100);
-}
-
-void toggleRelayState(int relayPin, bool relayState)
-{
-  writeToRelay(relayPin, !relayState);
-  Blynk.virtualWrite(V1, !relayState);
 }
 void readConfig()
 {
